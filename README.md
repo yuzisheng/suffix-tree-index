@@ -6,6 +6,8 @@ A Java implementation of an in-memory suffix tree index for quick in search.
 
 This index allows for adding texts (`List<String>`) to the index with match ids for each string. And you can search for any string list, and it returns an array of matching ids.
 
+If you want to index characters, just convert the string to a character list.
+
 ## 2. Example
 ```java
 public static void main(String[] args) {
