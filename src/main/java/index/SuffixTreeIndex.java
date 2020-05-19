@@ -29,7 +29,7 @@ public class SuffixTreeIndex {
         ArrayList<String> returnList = new ArrayList<>();
 
         while (searchIndex < length) {
-            // if edge is null check if the node has an edge starting with string at searchIndex
+            // if edge is null, check if the node has an edge starting with string at searchIndex
             if (edge == null) {
                 edge = searchNode.getChild(searchText.get(searchIndex));
                 if (edge == null) {
@@ -44,13 +44,14 @@ public class SuffixTreeIndex {
                     break;
                 }
             }
-            // if the edge index has reached the end advance to the next branch node
+
+            // if the edge index has reached the end, advance to the next branch node
             if (edgeIndex == (edge.length() - 1)) {
                 searchNode = edge.getChild();
                 edge = null;
             }
 
-            // control comes here if the char has matched
+            // control comes here if the string has matched
             searchIndex++;
             edgeIndex++;
         }
@@ -59,7 +60,8 @@ public class SuffixTreeIndex {
             if (edge != null) {
                 searchNode = edge.getChild();
             }
-            searchNode.fillMatchIds(returnList, 100);
+            // cancel max entries limit
+            searchNode.fillMatchIds(returnList, Integer.MAX_VALUE);
         }
         return returnList;
     }
@@ -97,7 +99,7 @@ public class SuffixTreeIndex {
             ListIterator<SuffixTreeOverlayEdge> leafIterator = newLeafEdges.listIterator(0);
             while (leafIterator.hasNext()) {
                 SuffixTreeOverlayEdge leafEdge = leafIterator.next();
-                // set the text for the sister stindexedge
+                // set the text for the sister st index edge
                 leafEdge.getStIndexEdge().setChild(new SuffixTreeIndexNode(matchIndex),
                         text.subList(leafEdge.getStartIndex() - 1, length));
             }
@@ -125,9 +127,6 @@ public class SuffixTreeIndex {
 
         /**
          * the modified version of update procedure of Ukkonen's SuffixTree algorithm
-         *
-         * @param sk SKTuple
-         * @param i  index
          */
         private void update(SKTuple sk, int i) {
             SuffixTreeOverlayNode oldr = root;
@@ -143,26 +142,21 @@ public class SuffixTreeIndex {
                 testAndSplitReturn.rState.getStIndexNode().addChild(text.get(i - 1), newIndexEdge);
                 testAndSplitReturn.rState.addChild(text.get(i - 1), newOverlayEdge);
 
-                // oldr is not root add a suffixlink to the state r
+                // oldr is not root add a suffix link to the state r
                 if (oldr != root) {
                     oldr.setSuffixLink(testAndSplitReturn.rState);
                 }
                 oldr = testAndSplitReturn.rState;
 
-                // in this implementation, we do not have a separate node for
-                // state _|_
-                // the check for root state tells when to stop following the
-                // suffix links.
+                // in this implementation, we do not have a separate node for state _|_
+                // the check for root state tells when to stop following the suffix links
                 if (sk.sState == root) {
-                    // if k <= i-1, then canonize of the suffixlink of
-                    // root,k,i-1 results
-                    // in s <-- root and k <-- k+1
+                    // if k <= i-1, then canonize of the suffix link of root,k,i-1 results in s <-- root and k <-- k+1
                     if (sk.kIndex <= i - 1) {
                         sk.kIndex++;
                     }
-                    // if k > i-1, then canonize leads to _|_ and susequent
-                    // canonize of _|_,k,i leads to
-                    // s <-- root, k <-- k+1 for next i <-- i+1
+                    // if k > i-1, then canonize leads to _|_
+                    // and susequent canonize of _|_,k,i leads to s <-- root, k <-- k+1 for next i <-- i+1
                     // so we increment k and break
                     else {
                         sk.kIndex++;
@@ -185,29 +179,22 @@ public class SuffixTreeIndex {
          * the modified version of the testAndSplit procedure of Ukkonen's SuffixTree algorithm
          * the method tests if the state represented by s,k,p is an end point for tVal
          * if it is not an endpoint, then it makes the state s,k,p explicit
-         *
-         * @param sk     SKTuple
-         * @param pIndex pIndex
-         * @param tVal   tVal
-         * @return TestAndSplitReturn
          */
         private TestAndSplitReturn testAndSplit(SKTuple sk, int pIndex, String tVal) {
             SuffixTreeOverlayEdge tOverlayEdge = sk.sState.getChild(text.get(sk.kIndex - 1));
             SuffixTreeIndexEdge tIndexEdge = sk.sState.getStIndexNode().getChild(text.get(sk.kIndex - 1));
 
             if (sk.kIndex <= pIndex) {
-                // check if the next character on the edge matches the next
-                // character in update tVal
+                // check if the next string on the edge matches the next string in update tVal
                 String nextStr = (tOverlayEdge.isDiscoveryLeaf()) ?
                         tIndexEdge.strAt(pIndex - sk.kIndex + 1) :
                         text.get(tOverlayEdge.getStartIndex() + pIndex - sk.kIndex);
 
                 if (tVal.equals(nextStr)) {
-                    // if the character matches, we have reached the end point
+                    // if the string matches, we have reached the end point
                     return new TestAndSplitReturn(true, sk.sState);
                 } else {
-                    // if the character does not match, create the state r - for
-                    // both overlay edge and index edge
+                    // if the string does not match, create the state r - for both overlay edge and index edge
                     SuffixTreeIndexNode rIndexState = new SuffixTreeIndexNode();
                     SuffixTreeOverlayNode rOverlayState = new SuffixTreeOverlayNode(rIndexState);
 
@@ -239,8 +226,7 @@ public class SuffixTreeIndex {
                 if (tOverlayEdge != null) {
                     return new TestAndSplitReturn(true, sk.sState);
                 } else if (tIndexEdge != null) {
-                    // if index has edge for the char, then create a new
-                    // discovery leaf for overlay
+                    // if index has edge for the string, then create a new discovery leaf for overlay
                     SuffixTreeOverlayEdge newOverlayEdge = new SuffixTreeOverlayEdge(sk.kIndex, tIndexEdge);
                     sk.sState.addChild(text.get(sk.kIndex - 1), newOverlayEdge);
                     return new TestAndSplitReturn(true, sk.sState);
@@ -254,17 +240,13 @@ public class SuffixTreeIndex {
          * the modified version of the canonize procedure of Ukkonen's SuffixTree algorithm
          * find the closest explicit state node for the state represented by s,k,p
          * the overlay discovers edges if this part of tree has not been visited yet
-         *
-         * @param sk     SKTuple
-         * @param pIndex pIndex
          */
         private void canonize(SKTuple sk, int pIndex) {
             if (pIndex >= sk.kIndex) {
                 SuffixTreeOverlayEdge overlayEdge = sk.sState.getChild(text.get(sk.kIndex - 1));
                 SuffixTreeIndexEdge indexEdge = sk.sState.getStIndexNode().getChild(text.get(sk.kIndex - 1));
 
-                // indexEdge is new leaf then we have reached the end of the
-                // tree and current s is the closest
+                // indexEdge is new leaf then we have reached the end of the tree and current s is the closest
                 while (!indexEdge.isNewLeaf()) {
                     // when k < p, there has to be an index edge
                     // but the overlay edge may not yet have been discovered
@@ -273,18 +255,15 @@ public class SuffixTreeIndex {
                     }
 
                     if (indexEdge.length() - 1 <= (pIndex - sk.kIndex)) {
-                        // if the overlayEdge is discovery edge, create a new
-                        // state in the overlay tree and point the overlay edge
-                        // to it
+                        // if the overlayEdge is discovery edge,
+                        // create a new state in the overlay tree and point the overlay edge to it
                         if (overlayEdge.isDiscoveryLeaf()) {
                             SuffixTreeOverlayNode newState = new SuffixTreeOverlayNode(indexEdge.getChild());
                             overlayEdge.setChild(newState, sk.kIndex + indexEdge.length() - 1);
 
-                            // find the suffix link for sState
-                            // in this implementation, we do not have a separate
-                            // node for state _|_
-                            // the check for root state tells how to find the
-                            // suffixlink for the root
+                            // find the suffix link for sState n this implementation,
+                            // we do not have a separate node for state _|_
+                            // the check for root state tells how to find the suffix link for the root
                             SKTuple localSk = new SKTuple(sk.sState, sk.kIndex);
                             if (localSk.sState == root) {
                                 localSk.kIndex++;
@@ -295,7 +274,7 @@ public class SuffixTreeIndex {
                             // discover suffix link for the new state
                             canonize(localSk, overlayEdge.getEndIndex());
 
-                            // set the suffixlink for the new state
+                            // set the suffix link for the new state
                             newState.setSuffixLink(localSk.sState);
                         }
 
@@ -330,24 +309,20 @@ public class SuffixTreeIndex {
                     sk.sState.getStIndexNode().addMatchIndex(matchIndex);
                 }
 
-                // find the suffix link for sState
-                // in this implementation, we do not have a separate
-                // node for state _|_
-                // the check for root state tells how to find the
-                // suffixlink for the root
+                // find the suffix link for sState in this implementation,
+                // we do not have a separate node for state _|_
+                // the check for root state tells how to find the suffix link for the root
                 if (sk.sState != root) {
                     sk.sState = sk.sState.getSuffixLink();
                     // add match id to the suffix
                     addMatchIds(sk, pIndex);
-
                 }
 
             } else {
                 SuffixTreeOverlayEdge overlayEdge = sk.sState.getChild(text.get(sk.kIndex - 1));
                 SuffixTreeIndexEdge indexEdge = sk.sState.getStIndexNode().getChild(text.get(sk.kIndex - 1));
 
-                // if the edge is a discovery node, create a new node
-                // and add the match index
+                // if the edge is a discovery node, create a new node and add the match index
                 if (overlayEdge.isDiscoveryLeaf()) {
                     SuffixTreeIndexNode newIndexState = new SuffixTreeIndexNode();
                     SuffixTreeIndexEdge newIndexEdge = new SuffixTreeIndexEdge(text.subList(sk.kIndex - 1, pIndex), newIndexState);
@@ -362,11 +337,9 @@ public class SuffixTreeIndex {
 
                     newIndexState.addMatchIndex(matchIndex);
 
-                    // find the suffix link for sState
-                    // in this implementation, we do not have a separate
-                    // node for state _|_
-                    // the check for root state tells how to find the
-                    // suffixlink for the root
+                    // find the suffix link for sState in this implementation,
+                    // we do not have a separate node for state _|_
+                    // the check for root state tells how to find the suffix link for the root
                     if (sk.sState == root) {
                         sk.kIndex++;
                     } else {
