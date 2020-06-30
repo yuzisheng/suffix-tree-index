@@ -13,10 +13,6 @@ class SuffixTreeOverlayNode {
         this.stIndexNode = stIndexNode;
     }
 
-    /**
-     * add a new edge (the edge has startIndex, endIndex and next node)
-     * adding an initialized edge is equivalent to adding the transition g'(s, (k,x)) = r
-     */
     void addChild(String childStr, SuffixTreeOverlayEdge edge) {
         childNodes.put(childStr, edge);
     }

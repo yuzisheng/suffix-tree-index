@@ -41,10 +41,6 @@ public class SuffixTreeIndexEdge {
         return this.text;
     }
 
-    /**
-     * check if the edge is a new leaf
-     * the new leaves are only in existence while a text is being added
-     */
     boolean isNewLeaf() {
         return (childNode == null);
     }

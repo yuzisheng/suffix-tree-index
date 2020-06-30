@@ -16,9 +16,6 @@ class SuffixTreeIndexNode {
         addMatchIndex(matchIndex);
     }
 
-    /**
-     * add a new edge (the edge has the string array and next node)
-     */
     void addChild(String childStr, SuffixTreeIndexEdge edge) {
         childNodes.put(childStr, edge);
     }
@@ -43,7 +40,6 @@ class SuffixTreeIndexNode {
                 returnList.add(matchIdIterator.next());
                 numAdded++;
             } else {
-                // there are no more entries in this index node look in the child nodes
                 break;
             }
         }
@@ -52,14 +48,12 @@ class SuffixTreeIndexNode {
             return numAdded;
         }
 
-        // look in the child nodes
         Iterator<SuffixTreeIndexEdge> childNodeIterator = childNodes.values().iterator();
 
         while (numAdded < maxEntries) {
             if (childNodeIterator.hasNext()) {
                 numAdded += childNodeIterator.next().getChild().fillMatchIds(returnList, maxEntries - numAdded);
             } else {
-                // reached the end of nodes
                 break;
             }
         }

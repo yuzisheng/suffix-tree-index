@@ -6,9 +6,6 @@ class SuffixTreeOverlayEdge {
     private SuffixTreeOverlayNode childNode;
     private final SuffixTreeIndexEdge stIndexEdge;
 
-    /**
-     * constructor to build a leaf edge (which will eventually point to a leaf node)
-     */
     SuffixTreeOverlayEdge(int startIndex, SuffixTreeIndexEdge stIndexEdge) {
         this.startIndex = startIndex;
         this.endIndex = -1;
@@ -16,9 +13,6 @@ class SuffixTreeOverlayEdge {
         this.stIndexEdge = stIndexEdge;
     }
 
-    /**
-     * constructor to build a branch edge (which points to a branch node)
-     */
     SuffixTreeOverlayEdge(int startIndex, int endIndex,
                           SuffixTreeOverlayNode childNode, SuffixTreeIndexEdge stIndexEdge) {
         this.startIndex = startIndex;
